@@ -1,10 +1,7 @@
 import argparse
 import json
-from threading import Thread
 
 from motion_tracker.motion_tracker import read_camera_output
-
-from multiprocessing import Process, Manager
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()

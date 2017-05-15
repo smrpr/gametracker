@@ -4,6 +4,7 @@ import time
 import cv2
 import datetime
 import imutils
+import requests
 from imutils.video import WebcamVideoStream
 
 logging.basicConfig(level=logging.INFO)
@@ -11,9 +12,12 @@ logger = logging.getLogger("MotionTracker")
 
 
 def send_data(conf, there_is_movement_flag):
-    print("I'm supposed to be posting status {} at {}".format(there_is_movement_flag, datetime.datetime.now()))
-    # requests.post(conf["server"]["url"], json={"room": conf["camera"]["room_id"], "in_use": there_is_movement_flag},
-    #               headers={'content-type': 'application/json'})
+    print("I'm supposed to be posting status {} at {} to {}.\n Full JSON: {}".format(there_is_movement_flag,
+                                                                                     datetime.datetime.now(),
+                                                                                     conf["server"]["url"], {
+                                                                                         "is_room_occupied": there_is_movement_flag}))
+    requests.post(conf["server"]["url"], json={"is_room_occupied": there_is_movement_flag},
+                  headers={'content-type': 'application/json'})
 
 
 def read_camera_output(conf, args):

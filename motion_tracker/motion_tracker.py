@@ -1,8 +1,8 @@
+import datetime
 import logging
 import time
 
 import cv2
-import datetime
 import imutils
 import requests
 from imutils.video import WebcamVideoStream
@@ -20,9 +20,11 @@ def send_data(conf, there_is_movement_flag):
     endpoint = conf["server"]["url"]
     json = build_json_payload(there_is_movement_flag)
     headers = {'content-type': 'application/json'}
-    requests.post(endpoint, json=json, headers=headers)
-
-    logger.info("POST status '%s' to %s", there_is_movement_flag, endpoint)
+    try:
+        requests.post(endpoint, json=json, headers=headers)
+        logger.info("POST status '%s' to %s", there_is_movement_flag, endpoint)
+    except:
+        logger.critical("Looks like the server is not online. Nothing has been sent.")
 
 
 def read_camera_output(conf, args):
@@ -75,22 +77,6 @@ def read_camera_output(conf, args):
         else:
             there_is_movement_flag = True
 
-        if last_movement_timestamp is None:
-            logger.debug("TS: {} || LAST MVMNT: -------------------------- || DIFF - || THERE IS MOVEMENT: {}".format(
-                timestamp, there_is_movement_flag))
-        else:
-            logger.debug("TS: {} || LAST MVMNT: {} || DIFF {} || THERE IS MOVEMENT: {}".format(
-                timestamp, last_movement_timestamp, int((timestamp - last_movement_timestamp).total_seconds()),
-                there_is_movement_flag))
-
-        ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
-        cv2.putText(frame, "Movement detected: {}".format(there_is_movement_flag), (10, 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        cv2.putText(frame, ts, (10, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.35, (0, 0, 255), 1)
-        cv2.putText(frame, "Last movement detected at: {}".format(last_movement_timestamp), (10, frame.shape[0] - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
-
         if last_post_status is None or last_post_status is not there_is_movement_flag:
             send_data(conf, there_is_movement_flag)
             last_post_status = there_is_movement_flag
@@ -98,6 +84,15 @@ def read_camera_output(conf, args):
         # time.sleep(0.5)
 
         if conf["camera"]["show_video"]:
+            ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
+            cv2.putText(frame, "Movement detected: {}".format(there_is_movement_flag), (10, 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            cv2.putText(frame, ts, (10, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.35, (0, 0, 255), 1)
+            cv2.putText(frame, "Last movement detected at: {}".format(last_movement_timestamp),
+                        (10, frame.shape[0] - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+
             # display the security feed
             cv2.imshow("Security Feed", frame)
             cv2.imshow('Threshold', thresh)

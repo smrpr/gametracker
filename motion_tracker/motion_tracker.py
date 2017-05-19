@@ -11,13 +11,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("MotionTracker")
 
 
+def build_json_payload(flag):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return {timestamp: flag}
+
+
 def send_data(conf, there_is_movement_flag):
-    print("I'm supposed to be posting status {} at {} to {}.\n Full JSON: {}".format(there_is_movement_flag,
-                                                                                     datetime.datetime.now(),
-                                                                                     conf["server"]["url"], {
-                                                                                         "is_room_occupied": there_is_movement_flag}))
-    requests.post(conf["server"]["url"], json={"is_room_occupied": there_is_movement_flag},
-                  headers={'content-type': 'application/json'})
+    endpoint = conf["server"]["url"]
+    json = build_json_payload(there_is_movement_flag)
+    headers = {'content-type': 'application/json'}
+    requests.post(endpoint, json=json, headers=headers)
+
+    logger.info("POST status '%s' to %s", there_is_movement_flag, endpoint)
 
 
 def read_camera_output(conf, args):
@@ -90,7 +95,7 @@ def read_camera_output(conf, args):
             send_data(conf, there_is_movement_flag)
             last_post_status = there_is_movement_flag
 
-        time.sleep(0.5)
+        # time.sleep(0.5)
 
         if conf["camera"]["show_video"]:
             # display the security feed

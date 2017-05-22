@@ -80,6 +80,9 @@ def _save_room_status():
 
 @_APP.get(_URL_STATUS)
 def _get_room_status():
+    if len(ROOM_STATUS) == 0:
+        return "Still haven't received any data."
+    
     return ROOM_STATUS[-1]
 
 

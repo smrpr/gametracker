@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import collections
 import logging
-from collections import defaultdict
 
 from bottle import ServerAdapter, Bottle, request
 
@@ -19,7 +19,7 @@ _URL_POST = _URLS_PREFIX + '/post'
 _URL_STATUS = _URLS_PREFIX + '/status'
 _URL_HEALTHCHECK = _URLS_PREFIX + "/healthcheck"
 
-room_status_dict = defaultdict(dict)  # Dict containing all live deals
+ROOM_STATUS = collections.deque(maxlen=5)
 
 # Bottle application
 _APP = Bottle()
@@ -75,12 +75,12 @@ def _error404(error):
 
 @_APP.post(_URL_POST)
 def _save_room_status():
-    room_status_dict.update(request.json)
+    ROOM_STATUS.append(request.json)
 
 
 @_APP.get(_URL_STATUS)
 def _get_room_status():
-    return room_status_dict
+    return ROOM_STATUS[-1]
 
 
 @_APP.get(_URL_HEALTHCHECK)

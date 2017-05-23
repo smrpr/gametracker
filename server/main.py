@@ -19,7 +19,7 @@ _URL_POST = _URLS_PREFIX + '/post'
 _URL_STATUS = _URLS_PREFIX + '/status'
 _URL_HEALTHCHECK = _URLS_PREFIX + "/healthcheck"
 
-ROOM_STATUS = collections.deque(maxlen=5)
+ROOM_STATUS = collections.deque(maxlen=2)
 
 # Bottle application
 _APP = Bottle()
@@ -80,10 +80,10 @@ def _save_room_status():
 
 @_APP.get(_URL_STATUS)
 def _get_room_status():
-    if len(ROOM_STATUS) == 0:
-        return "Still haven't received any data."
-    
-    return ROOM_STATUS[-1]
+    if len(ROOM_STATUS) < 2:
+        return "Still haven't received enough data."
+
+    return {1: ROOM_STATUS[-1], 2: ROOM_STATUS[-2]}
 
 
 @_APP.get(_URL_HEALTHCHECK)

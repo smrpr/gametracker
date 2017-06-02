@@ -1,7 +1,4 @@
 import argparse
-import os
-import sys
-
 import yaml
 
 from motion_tracker.motion_tracker import read_camera_output

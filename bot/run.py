@@ -1,14 +1,14 @@
+import random
 import re
 
 import requests
 from slackbot.bot import Bot, listen_to
 
-STATUS_ENDPOINT = "http://0.0.0.0:8899/api/status"
-OCCUPIED_MSG = "The room is occupied. It has been like that since {}."
-FREE_MSG = "The room is FREE! Go play some Mario Kart. Last time used was {}."
+from bot.slackbot_settings import STATUS_ENDPOINT, OCCUPIED_MSGS_LIST, FREE_MSGS_LIST
 
 
 @listen_to("room status", re.IGNORECASE)
+@listen_to("is free", re.IGNORECASE)
 def check_room_status(message):
     room_status = requests.get(STATUS_ENDPOINT).json()
 
@@ -24,11 +24,11 @@ def check_room_status(message):
         s2 = status
 
     if s1 is True:
-        msg = OCCUPIED_MSG.format(t1)
+        msg = random.choice(OCCUPIED_MSGS_LIST).format(t1)
     else:
-        msg = FREE_MSG.format(t2)
+        msg = random.choice(FREE_MSGS_LIST).format(t2)
 
-    message.send("> {}".format(msg))
+    message.send("{}".format(msg))
 
 
 def main():

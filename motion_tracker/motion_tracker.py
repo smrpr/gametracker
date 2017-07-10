@@ -28,10 +28,11 @@ def send_data(conf, there_is_movement_flag):
 
 
 def read_camera_output(conf, args):
-    camera = WebcamVideoStream(src=args["video_input"]).start()
+    camera = WebcamVideoStream(src=args["video_input"])
+    camera.start()
+
     logger.info("warming up...")
     time.sleep(conf["camera"]["camera_warmup_time"])
-
     avg = None
     last_movement_timestamp = None
     there_is_movement_flag = False
@@ -81,8 +82,6 @@ def read_camera_output(conf, args):
             send_data(conf, there_is_movement_flag)
             last_post_status = there_is_movement_flag
 
-        # time.sleep(0.5)
-
         if conf["camera"]["show_video"]:
             ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
             cv2.putText(frame, "Movement detected: {}".format(there_is_movement_flag), (10, 20),
@@ -101,3 +100,5 @@ def read_camera_output(conf, args):
             # if the `q` key is pressed, break from the lop
             if key == ord("q"):
                 break
+
+            cv2.destroyAllWindows()

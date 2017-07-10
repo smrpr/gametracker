@@ -52,20 +52,7 @@ def read_camera_output(conf, args):
             avg = gray.copy().astype("float")
             continue
 
-        cv2.accumulateWeighted(gray, avg, 0.5)
-        frame_delta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-
-        thresh = cv2.threshold(frame_delta, conf["camera"]["delta_thresh"], 255, cv2.THRESH_BINARY)[1]
-        thresh = cv2.dilate(thresh, None, iterations=2)
-        (image, contours, hierarchy) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        for c in contours:
-            if cv2.contourArea(c) < conf["camera"]["min_area"]:
-                continue
-
-            (x, y, w, h) = cv2.boundingRect(c)
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            last_movement_timestamp = datetime.datetime.now()
+        last_movement_timestamp = check_movement(avg, conf, frame, gray, last_movement_timestamp)
 
         if last_movement_timestamp is not None:
             time_threshold = int((timestamp - last_movement_timestamp).total_seconds()) >= conf["camera"][
@@ -93,8 +80,7 @@ def read_camera_output(conf, args):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
             # display the security feed
-            cv2.imshow("Security Feed", frame)
-            cv2.imshow('Threshold', thresh)
+            cv2.imshow("Cam feed", frame)
             key = cv2.waitKey(1) & 0xFF
 
             # if the `q` key is pressed, break from the lop
@@ -102,3 +88,24 @@ def read_camera_output(conf, args):
                 break
 
             cv2.destroyAllWindows()
+
+
+def check_movement(avg, conf, frame, gray, last_movement_timestamp):
+    cv2.accumulateWeighted(gray, avg, 0.5)
+
+    frame_delta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
+
+    thresh = cv2.threshold(frame_delta, conf["camera"]["delta_thresh"], 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.dilate(thresh, None, iterations=2)
+
+    (image, contours, hierarchy) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for c in contours:
+        if cv2.contourArea(c) < conf["camera"]["min_area"]:
+            continue
+
+        (x, y, w, h) = cv2.boundingRect(c)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
+        last_movement_timestamp = datetime.datetime.now()
+
+    return last_movement_timestamp

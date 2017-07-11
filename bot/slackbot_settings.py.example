@@ -1,0 +1,19 @@
+#!/usr/bin/env python3.5
+# -*- coding: utf-8 -*-
+
+# Slack config
+API_TOKEN = "YOUR_API_TOKEN_HERE"
+
+# API endpoint
+STATUS_ENDPOINT = "http://0.0.0.0:8899/api/status"
+
+# Bot config
+default_reply = "At the moment I am only smart enough to tell you room statuses."
+
+OCCUPIED_MSGS_LIST = ["The room is busy. It has been like that since {}.",
+                      "I'm sorry mate, doesn't look like you're going to play soon. Room has been busy since {}.",
+                      ":spongegar: tElL mE tHe RoOm StAtUs PlEaSe :spongegar:. IT'S BUSY. B-U-S-Y since {}."]
+FREE_MSGS_LIST = ["The room is FREE! Last time it was used was {}.",
+                  "Yay, room is *free* for you to use! Go play while you're getting paid for it!",
+                  "Room is *FREE*. Thanks for taking part in this survey to know who is slacking the most at "
+                  "Skyscanner. Results forwared to :gareth:"]
